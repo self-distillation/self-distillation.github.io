@@ -1,4 +1,4 @@
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>Self-Distillation Enables Continual Learning</title><style>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Self-Distillation Enables Continual Learning</title><style>
     @import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css');
     /* cspell:disable-file */
     /* webkit printing magic: print all background colors */
@@ -686,13 +686,53 @@
     .checkbox-off {
         background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
     }
+
+    /* Mobile responsive styles */
+    @media (max-width: 768px) {
+        body {
+            margin: 1em;
+            padding: 0 0.5em;
+        }
+        
+        .page-title {
+            font-size: 1.75rem;
+        }
+        
+        h1 { font-size: 1.5rem; }
+        h2 { font-size: 1.25rem; }
+        h3 { font-size: 1.1rem; }
+        
+        .column-list {
+            flex-direction: column-reverse;
+        }
+        
+        .column {
+            width: 100% !important;
+            padding: 0;
+            margin-bottom: 1em;
+        }
+        
+        .column:first-child {
+            margin-bottom: 0;
+        }
+        
+        figure.image {
+            margin: 1em 0;
+        }
+        
+        pre.code {
+            font-size: 0.75rem;
+            padding: 1em 0.75em;
+            overflow-x: auto;
+        }
+    }
         
     </style></head><body><article class="page sans"><header><h1 class="page-title">Self-Distillation Enables Continual Learning</h1><p class="page-description"></p></header><div class="page-body"><p><a href="https://idanshen.github.io/">Idan Shenfeld</a><sup>1</sup>,  <a href="https://damanimehul.github.io/">Mehul Damani</a><sup>1</sup>,  <a href="https://jonhue.github.io/">Jonas Hübotter</a><sup>2</sup>, <a href="https://people.csail.mit.edu/pulkitag/">Pulkit Agrawal</a><sup>1</sup></p><p><sup>1</sup>MIT <sup>2</sup>ETH Zurich</p><p><strong>Paper: </strong><a href="https://arxiv.org/abs/2509.04259">https://arxiv.org/abs/2509.04259</a></p><p>
     </p><figure class="image" style="text-align:center;margin-bottom:3.5em;"><a href="figures/diagram.png"><img style="width:100%;max-width:800px;" src="figures/diagram.png"/></a></figure><h3><strong>Abstract </strong></h3><p>Continual learning, enabling models to acquire new skills and knowledge without degrading existing capabilities, remains a fundamental challenge for foundation models. While on-policy reinforcement learning can reduce forgetting, it requires explicit reward functions that are often unavailable. Learning from expert demonstrations, the primary alternative, is dominated by supervised fine-tuning (SFT), which is inherently off-policy. <mark class="highlight-blue"><strong>We introduce Self-Distillation Fine-Tuning (SDFT), a simple method that enables on-policy learning directly from demonstrations.</strong></mark> SDFT leverages in-context learning by using a demonstration-conditioned model as its own teacher, generating on-policy training signals that preserve prior capabilities while acquiring new skills. Across skill learning and knowledge acquisition tasks, SDFT consistently outperforms SFT, achieving higher new-task accuracy while substantially reducing catastrophic forgetting. In sequential learning experiments, SDFT enables a single model to accumulate multiple skills over time without performance regression, establishing on-policy distillation as a practical path to continual learning from demonstrations.</mark></em></p><figure class="image"><a href="figures/teaser_fig.png"><img style="width:2560px" src="figures/teaser_fig.png"/></a></figure><p>
     </p><h3><strong>Learning without forgetting</strong></h3><figure class="image"><a href="figures/forgetting.png"><img style="width:3254px" src="figures/forgetting.png"/></a></figure><p>In a challenging continual learning experiment, we train a single model sequentially on three different tasks. <mark class="highlight-blue"><strong>SDFT successfully learns each new task while retaining performance on previous ones.</strong></mark> In contrast, SFT exhibits severe interference—performance on earlier skills rapidly degrades once training shifts to a new task. This demonstrates that SDFT supports true continual learning, allowing incremental skill acquisition without catastrophic forgetting.</p><p>
     </p><h3><strong>On-policy Learning Leads to Better Generalization</strong></h3><div class="column-list"><div style="width:43.75%" class="column"><p>Beyond reducing catastrophic forgetting, we discovered that SDFT actually learns new tasks better than SFT. Across multiple skill-learning and knowledge-acquisition tasks, <mark class="highlight-blue"><strong>models trained with SDFT consistently achieve higher performance (in-distribution generalization) than those trained with supervised fine-tuning.</strong></mark> Why? Off-policy learning trains only on expert-induced trajectories—but at test time, small errors can push the model into states it never saw during training, causing compounding mistakes. SDFT avoids this mismatch by training on the model's own generated trajectories, teaching it to recover from its own errors rather than just memorizing expert paths. </p><p>
     </p></div><div style="width:56.25%" class="column"><figure class="image"><a href="figures/generalization.png"><img style="width:2370px" src="figures/generalization.png"/></a></figure><p>
-    </p></div></div><h3><strong>Theoretical Perspective</strong></h3><div class="column-list"><div style="width:43.75%" class="column"><p>The stronger a model's in-context learning, the better SDFT works. At 3B parameters, the model's ICL ability is too weak to provide meaningful teacher guidance, and SDFT underperforms SFT. But as we scale up, the gains grow consistently: the 7B model achieves a 4-point improvement over SFT, and the 14B model widens the gap to 7 points. <mark class="highlight-blue"><strong> This trend suggests that with frontier models and their strong in-context reasoning, SDFT's advantages will only become more pronounced. </strong></mark> </p><p>
+    </p></div></div><h3><strong>SDFT Benefits from Model Scale</strong></h3><div class="column-list"><div style="width:43.75%" class="column"><p>The stronger a model's in-context learning, the better SDFT works. At 3B parameters, the model's ICL ability is too weak to provide meaningful teacher guidance, and SDFT underperforms SFT. But as we scale up, the gains grow consistently: the 7B model achieves a 4-point improvement over SFT, and the 14B model widens the gap to 7 points. <mark class="highlight-blue"><strong> This trend suggests that with frontier models and their strong in-context reasoning, SDFT's advantages will only become more pronounced. </strong></mark> </p><p>
     </p></div><div style="width:56.25%" class="column"><figure class="image" style="margin-top:0;"><a href="figures/scaling.png"><img style="width:2370px" src="figures/scaling.png"/></a></figure><p>
     </p></div></div><h3><strong>Bibtex</strong></h3><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerPolicy="no-referrer"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerPolicy="no-referrer"/><pre class="code code-wrap"><code class="language-Plain Text" style="white-space:pre-wrap;word-break:break-all">@misc{shenfeld2025rlsrazoronlinereinforcement,
           title={RL&#x27;s Razor: Why Online Reinforcement Learning Forgets Less}, 
