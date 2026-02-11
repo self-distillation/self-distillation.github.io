@@ -10,13 +10,29 @@
   <link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;500;600&family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.28/dist/katex.min.css" integrity="sha384-Wsr4Nh3yrvMf2KCebJchRJoVo1gTU6kcP05uRSh5NV3sj9+a8IomuJoQzf3sMq4T" crossorigin="anonymous"/>
   <style>
+    @font-face {
+      font-family: "Palatino Web";
+      src: url("fonts/Palatino.ttc") format("truetype-collection");
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: "Palatino Web";
+      src: url("fonts/Palatino.ttc") format("truetype-collection");
+      font-style: italic;
+      font-weight: 400;
+      font-display: swap;
+    }
+
     :root {
       --bg: #ffffff;
       --text: #252525;
       --muted: #727272;
       --rule: #e5e5e0;
       --accent: #1e5f98;
-      --font-body-heading: "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+      --font-body-heading: "Palatino Web", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
       /* --font-body-heading: Inter; */
       --font-code: Inconsolata, "Courier New", Courier, monospace;
       --footnote-size: 0.9rem;
