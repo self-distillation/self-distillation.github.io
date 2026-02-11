@@ -1,98 +1,1053 @@
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Self-Distillation</title><link rel="stylesheet" href="common.css"/><style>
+<!DOCTYPE html>
+<!-- KaTeX requires the use of the HTML5 doctype. Without it, KaTeX may not render properly -->
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>On-Policy Self-Distillation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;500;600&family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.28/dist/katex.min.css" integrity="sha384-Wsr4Nh3yrvMf2KCebJchRJoVo1gTU6kcP05uRSh5NV3sj9+a8IomuJoQzf3sMq4T" crossorigin="anonymous"/>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --text: #252525;
+      --muted: #727272;
+      --rule: #e5e5e0;
+      --accent: #1e5f98;
+      --font-body-heading: "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+      /* --font-body-heading: Inter; */
+      --font-code: Inconsolata, "Courier New", Courier, monospace;
+      --footnote-size: 0.9rem;
+      --toc-width: 300px;
+      --article-width: 660px;
+      --margin-note-width: 300px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     html,
     body {
-        height: 100%;
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
     }
 
     body {
+      font-family: var(--font-body-heading);
+      font-weight: 400;
+      line-height: 1.58;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      font-family: var(--font-body-heading);
+    }
+
+    code,
+    pre {
+      font-family: var(--font-code);
+    }
+
+    a {
+      color: var(--accent);
+    }
+
+    .blog-shell {
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 2rem 1.75rem 3rem;
+      display: grid;
+      grid-template-columns: var(--toc-width) minmax(0, var(--article-width)) var(--margin-note-width);
+      column-gap: 2.5rem;
+      align-items: start;
+      justify-content: center;
+      visibility: hidden;
+    }
+
+    .blog-shell.is-ready {
+      visibility: visible;
+    }
+
+    .toc {
+      position: sticky;
+      top: 2rem;
+      align-self: start;
+      padding-top: 0.25rem;
+    }
+
+    .toc ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .toc li {
+      margin: 0;
+      padding: 0;
+    }
+
+    .toc a {
+      display: block;
+      padding: 0.15rem 0 0.15rem 0.9rem;
+      text-decoration: none;
+      color: #4a4a4a;
+      font-size: 0.9rem;
+    }
+
+    .toc a.toc-subsection {
+      padding-left: 1.65rem;
+      font-size: 0.86rem;
+    }
+
+    .toc a:hover {
+      color: var(--accent);
+    }
+
+    .article {
+      min-width: 0;
+    }
+
+    .article-header {
+      margin-bottom: 3.5rem;
+      margin-top: 2.5rem;
+      text-align: center;
+    }
+
+    .article-title {
+      margin: 0;
+      /* font-family: Inter, ui-sans-serif, -apple-system, sans-serif; */
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      font-size: 2.2rem;
+      color: #1f2430;
+    }
+
+    .article-meta {
+      font-family: Inter, ui-sans-serif, -apple-system, sans-serif;
+      margin-top: 1rem;
+      color: var(--muted);
+      font-size: 0.9rem !important;
+    }
+
+    .article-authors {
+      margin: 1.5rem 0 0 !important;
+      line-height: 1.4;
+      color: #2f2f2f;
+      text-align: center;
+      font-family: Inter, ui-sans-serif, -apple-system, sans-serif;
+      font-size: 0.9rem !important;
+    }
+
+    .article-authors a {
+      color: inherit;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .article-affiliations {
+      margin: 0.2rem 0 0 !important;
+      line-height: 1.25;
+      color: #2f2f2f;
+      text-align: center;
+      font-family: Inter, ui-sans-serif, -apple-system, sans-serif;
+      font-size: 0.9rem !important;
+    }
+
+    .article section {
+      margin-top: 1.65rem;
+      scroll-margin-top: 1.2rem;
+    }
+
+    .article h2 {
+      margin: 3rem 0 1.5rem;
+      font-size: 1.4rem;
+      line-height: 1.2;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    .article h3 {
+      margin: 2rem 0 1.25rem;
+      font-size: 1.4rem;
+      font-style: italic;
+      line-height: 1.3;
+      font-weight: 400;
+      letter-spacing: -0.005em;
+    }
+
+    .article p {
+      margin: 0.65rem 0;
+      font-size: 1.05rem;
+    }
+
+    .tldr-box {
+      margin: 0.95rem 0 1.1rem;
+      padding: 0.8rem 0.95rem;
+      border-radius: 8px;
+      background: #f5f5f5;
+    }
+
+    .tldr-box p {
+      margin: 0;
+      font-size: 1.05rem;
+    }
+
+    .paragraph-with-note {
+      position: relative;
+    }
+
+    .footnote-ref {
+      font-size: 0.75em;
+      vertical-align: super;
+      margin-left: 0.15em;
+      text-decoration: none;
+      /* font-family: Inter, ui-sans-serif, -apple-system, sans-serif; */
+      color: var(--accent);
+    }
+
+    .sidenote {
+      position: absolute;
+      left: calc(100% + 2rem);
+      top: 0.15rem;
+      width: var(--margin-note-width);
+      font-size: var(--footnote-size);
+      line-height: 1.45;
+      color: #5f5f5f;
+      border-left: 1px solid var(--rule);
+      padding-left: 0.9rem;
+    }
+
+    .sidenote-index {
+      /* font-family: Inter, ui-sans-serif, -apple-system, sans-serif; */
+      color: var(--muted);
+      margin-right: 0.4rem;
+      vertical-align: super;
+      font-size: 0.75em;
+    }
+
+    .display-equation {
+      margin: 1.15rem 0;
+      overflow-x: auto;
+    }
+
+    .code-block {
+      margin: 0.95rem 0 1.1rem;
+      padding: 0.8rem 0.95rem;
+      border-radius: 8px;
+      /* border: 1px solid #e4e4e0; */
+      background: #f5f5f5;
+      overflow-x: auto;
+    }
+
+    .code-block code {
+      font-size: 1rem;
+      line-height: 1.1 !important;
+      white-space: pre;
+      color: #4c4c4c;
+      letter-spacing: -0.01em;
+    }
+
+    .text-width-image {
+      margin: 1.3rem 0;
+      width: 100%;
+      cursor: default;
+    }
+
+    .text-width-image img {
+      width: 100%;
+      max-width: 100%;
+      display: block;
+      border-radius: 6px;
+      cursor: zoom-in;
+      transition: width 220ms ease, margin-left 220ms ease, margin-right 220ms ease, border-radius 220ms ease, box-shadow 220ms ease;
+    }
+
+    .text-width-image.is-zoomed {
+      cursor: default;
+    }
+
+    .text-width-image.is-zoomed img {
+      width: min(96vw, 1400px);
+      max-width: none;
+      margin-left: calc((min(96vw, 1400px) - 100%) / -2);
+      margin-right: calc((min(96vw, 1400px) - 100%) / -2);
+      position: relative;
+      z-index: 8;
+      cursor: zoom-out;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.1);
+    }
+
+    .text-width-image figcaption {
+      margin-top: 0.2rem;
+      font-size: var(--footnote-size);
+      color: var(--muted);
+      line-height: 1.35;
+      cursor: default;
+    }
+
+    .citation {
+      text-decoration: none;
+      /* font-family: Inter, ui-sans-serif, -apple-system, sans-serif; */
+      font-size: 0.88em;
+      color: var(--accent);
+    }
+
+    .references {
+      margin-top: 2.2rem;
+      border-top: 1px solid var(--rule);
+      padding-top: 1rem;
+    }
+
+    .references h3 {
+      margin: 0;
+      /* font-family: Inter, ui-sans-serif, -apple-system, sans-serif; */
+      letter-spacing: -0.01em;
+      font-size: 1.1rem;
+    }
+
+    .references ol {
+      margin: 0.5rem 0 0;
+      padding-left: 1.35rem;
+      font-size: 0.9rem;
+    }
+
+    .references li {
+      margin: 0.45rem 0;
+    }
+
+    @media (max-width: 1220px) {
+      .blog-shell {
+        grid-template-columns: 1fr;
+        max-width: 760px;
+        row-gap: 1.2rem;
+      }
+
+      .toc {
+        position: static;
+        padding-top: 0;
+        border-bottom: 1px solid var(--rule);
+        padding-bottom: 0.8rem;
+      }
+
+      .toc ul {
+        border-left: none;
         display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 100%;
-        background: #ffffff;
-        color: #1f2937;
-        line-height: 1.5;
-    }
+        flex-wrap: wrap;
+        gap: 0.25rem 0.9rem;
+      }
 
-    a,
-    a.visited {
-        text-decoration: none;
-    }
-
-    a:hover,
-    a:focus {
-        text-decoration: underline;
-        text-underline-offset: 4px;
-    }
-
-    .page-title {
-        font-size: clamp(2.5rem, 5vw, 3.25rem);
-        font-weight: 700;
-        margin-top: 0;
-        margin-bottom: 1.5rem;
-    }
-
-    h1 {
-        font-size: 1.875rem;
-        margin-top: 1.875rem;
-    }
-
-    h2 {
-        font-size: 1.5rem;
-        margin-top: 1.5rem;
-    }
-
-    h3 {
-        font-size: 1.25rem;
-        margin-top: 1.25rem;
-    }
-
-    .page-description {
-        margin-bottom: 2em;
-    }
-
-    .page {
-        display: flex;
-        flex-direction: column;
-        gap: 1.25rem;
-        text-align: center;
-        width: min(92vw, 900px);
-    }
-
-    .link-list {
-        list-style: none;
+      .toc a {
         padding: 0;
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
+      }
+
+      .sidenote {
+        position: static;
+        width: auto;
+        border-left: 2px solid var(--rule);
+        margin: 0.4rem 0 0.9rem;
+        padding-left: 0.7rem;
+      }
     }
 
-    .link-list li {
-        flex: 1;
-    }
+    @media (max-width: 680px) {
+      .blog-shell {
+        padding: 1.2rem 0.9rem 2rem;
+      }
 
-    .link-list a {
-        display: block;
-        padding: 1rem 1.2rem;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        font-size: 1.05rem;
-        background: #f9fafb;
-        transition: background 150ms ease, border-color 150ms ease;
-        height: 100%;
-    }
+      .article p {
+        font-size: 0.98rem;
+      }
 
-    .link-list a:hover,
-    .link-list a:focus {
-        background: #ffffff;
-        border-color: #cbd5f5;
     }
+  </style>
+</head>
+<body>
+  <main class="blog-shell">
+    <nav class="toc" aria-label="Table of contents">
+      <ul id="toc-list"></ul>
+    </nav>
+    <article class="article" id="article-root"></article>
+    <aside aria-hidden="true"></aside>
+  </main>
 
-    @media (min-width: 720px) {
-        .link-list {
-            flex-direction: row;
-            gap: 1rem;
+  <script>
+    window.__renderBlogMath = function () {
+      var root = document.getElementById("article-root");
+      if (!root || typeof renderMathInElement !== "function") {
+        return;
+      }
+      renderMathInElement(root, {
+        delimiters: [
+          { left: "$$", right: "$$", display: true },
+          { left: "$", right: "$", display: false }
+        ],
+        throwOnError: false
+      });
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.28/dist/katex.min.js" integrity="sha384-+W9OcrYK2/bD7BmUAk+xeFAyKp0QjyRQUCxeU31dfyTt/FrPsUgaBTLLkVf33qWt" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.28/dist/contrib/auto-render.min.js" integrity="sha384-hCXGrW6PitJEwbkoStFjeJxv+fSOOQKOPbJxSfM6G5sWZjAyWhXiTIIAmQqnlLlh" crossorigin="anonymous" onload="window.__renderBlogMath && window.__renderBlogMath();"></script>
+  <script>
+    (async function () {
+      var tocList = document.getElementById("toc-list");
+      var articleRoot = document.getElementById("article-root");
+      var blogShell = document.querySelector(".blog-shell");
+      var footnoteCount = 0;
+      var footnoteNumbersById = {};
+      var citationOrder = [];
+      var citationMap = {};
+      var referencesById = {};
+      var footnotesById = {};
+
+      function revealPage() {
+        if (blogShell) {
+          blogShell.classList.add("is-ready");
         }
-    }
-</style></head><body><article class="page sans"><h1 class="page-title">Self-Distillation</h1><ul class="link-list"><li><a href="SDFT.html">SDFT: Self-Distillation Enables Continual Learning</a></li><li><a href="SDPO.html">SDPO: Reinforcement Learning via Self-Distillation</a></li></ul></article></body></html>
+      }
+
+      function escapeHtml(text) {
+        return text
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+      }
+
+      function slugify(text) {
+        return text
+          .toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, "")
+          .trim()
+          .replace(/\s+/g, "-");
+      }
+
+      function renderInline(rawText, paragraphFootnoteIds, allowFootnotes) {
+        var rendered = escapeHtml(rawText);
+        rendered = rendered.replace(/`([^`]+)`/g, "<code>$1</code>");
+        rendered = rendered.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+        rendered = rendered.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+        rendered = rendered.replace(/\*([^*]+)\*/g, "<em>$1</em>");
+        rendered = rendered.replace(/\[@([a-zA-Z0-9_-]+)\]/g, function (_, citationId) {
+          if (!citationMap[citationId]) {
+            citationOrder.push(citationId);
+            citationMap[citationId] = citationOrder.length;
+          }
+          var citationNumber = citationMap[citationId];
+          return '<a class="citation" href="#ref-' + citationId + '" aria-label="citation ' + citationNumber + '">[' + citationNumber + "]</a>";
+        });
+        if (allowFootnotes) {
+          rendered = rendered.replace(/\[\^([a-zA-Z0-9_-]+)\]/g, function (_, footnoteId) {
+            if (!footnoteNumbersById[footnoteId]) {
+              footnoteCount += 1;
+              footnoteNumbersById[footnoteId] = footnoteCount;
+            }
+            if (paragraphFootnoteIds.indexOf(footnoteId) === -1) {
+              paragraphFootnoteIds.push(footnoteId);
+            }
+            var number = footnoteNumbersById[footnoteId];
+            return '<a class="footnote-ref" href="#note-' + number + '" aria-label="footnote ' + number + '">' + number + "</a>";
+          });
+        }
+        return rendered;
+      }
+
+      function parseReferenceDefinition(rawLine) {
+        var match = rawLine.match(/^\[@([a-zA-Z0-9_-]+)\]:\s*(.+)$/);
+        if (!match) {
+          return null;
+        }
+        var id = match[1];
+        var payload = match[2];
+        var parts = payload.split("||");
+        var text = parts[0].trim();
+        var url = parts.length > 1 ? parts.slice(1).join("||").trim() : "";
+        return { id: id, text: text, url: url };
+      }
+
+      function parseFrontMatter(markdown) {
+        if (!markdown.startsWith("---\n")) {
+          return { meta: {}, body: markdown };
+        }
+        var end = markdown.indexOf("\n---\n", 4);
+        if (end === -1) {
+          return { meta: {}, body: markdown };
+        }
+        var rawMeta = markdown.slice(4, end).split("\n");
+        var meta = {};
+        for (var i = 0; i < rawMeta.length; i += 1) {
+          var line = rawMeta[i];
+          var separator = line.indexOf(":");
+          if (separator === -1) {
+            continue;
+          }
+          var key = line.slice(0, separator).trim();
+          var value = line.slice(separator + 1).trim();
+          meta[key] = value;
+        }
+        return { meta: meta, body: markdown.slice(end + 5) };
+      }
+
+      function stripCommentedContent(markdownBody) {
+        var lines = markdownBody.split(/\r?\n/);
+        var output = [];
+        var inCodeFence = false;
+        var inHtmlComment = false;
+
+        for (var i = 0; i < lines.length; i += 1) {
+          var line = lines[i];
+          var trimmed = line.trim();
+
+          if (!inHtmlComment && /^```/.test(trimmed)) {
+            inCodeFence = !inCodeFence;
+            output.push(line);
+            continue;
+          }
+
+          if (inCodeFence) {
+            output.push(line);
+            continue;
+          }
+
+          var working = line;
+          while (true) {
+            if (inHtmlComment) {
+              var commentEnd = working.indexOf("-->");
+              if (commentEnd === -1) {
+                working = "";
+                break;
+              }
+              working = working.slice(commentEnd + 3);
+              inHtmlComment = false;
+              continue;
+            }
+
+            var commentStart = working.indexOf("<!--");
+            if (commentStart === -1) {
+              break;
+            }
+
+            var trailing = working.slice(commentStart + 4);
+            var inlineEnd = trailing.indexOf("-->");
+            if (inlineEnd === -1) {
+              working = working.slice(0, commentStart);
+              inHtmlComment = true;
+              break;
+            }
+
+            working =
+              working.slice(0, commentStart) +
+              trailing.slice(inlineEnd + 3);
+          }
+
+          if (/^\s*\[\/\/\]:\s*#/.test(working)) {
+            continue;
+          }
+          output.push(working);
+        }
+
+        return output.join("\n");
+      }
+
+      function parseMarkdown(markdown) {
+        var frontMatter = parseFrontMatter(markdown);
+        var body = stripCommentedContent(frontMatter.body);
+        var lines = body.split(/\r?\n/);
+        var contentLines = [];
+
+        for (var i = 0; i < lines.length; i += 1) {
+          var trimmed = lines[i].trim();
+          var footnoteMatch = trimmed.match(/^\[\^([a-zA-Z0-9_-]+)\]:\s*(.+)$/);
+          if (footnoteMatch) {
+            footnotesById[footnoteMatch[1]] = footnoteMatch[2];
+            continue;
+          }
+
+          var reference = parseReferenceDefinition(trimmed);
+          if (reference) {
+            referencesById[reference.id] = { text: reference.text, url: reference.url };
+            continue;
+          }
+
+          contentLines.push(lines[i]);
+        }
+
+        var sections = [];
+        var currentSection = null;
+        var paragraphLines = [];
+        var usedIds = {};
+
+        function flushParagraph() {
+          if (!currentSection || paragraphLines.length === 0) {
+            return;
+          }
+          var paragraphText = paragraphLines.join(" ").trim();
+          var tldrMatch = paragraphText.match(/^\*\*tl;dr:\*\*\s*/i);
+          if (tldrMatch) {
+            currentSection.blocks.push({
+              type: "tldr",
+              text: paragraphText.slice(tldrMatch[0].length).trim(),
+            });
+            paragraphLines = [];
+            return;
+          }
+          currentSection.blocks.push({
+            type: "paragraph",
+            text: paragraphText,
+          });
+          paragraphLines = [];
+        }
+
+        function makeUniqueId(baseId) {
+          var uniqueId = baseId;
+          var suffix = 2;
+          while (usedIds[uniqueId]) {
+            uniqueId = baseId + "-" + suffix;
+            suffix += 1;
+          }
+          usedIds[uniqueId] = true;
+          return uniqueId;
+        }
+
+        function pushSection(title, forcedId) {
+          var baseId = forcedId || slugify(title) || "section";
+          var uniqueId = makeUniqueId(baseId);
+          currentSection = { id: uniqueId, title: title, blocks: [] };
+          sections.push(currentSection);
+        }
+
+        for (var j = 0; j < contentLines.length; j += 1) {
+          var line = contentLines[j];
+          var trimmedLine = line.trim();
+          var subheadingMatch = trimmedLine.match(/^###\s+(.+)$/);
+          if (subheadingMatch) {
+            flushParagraph();
+            if (!currentSection) {
+              pushSection("", "preface");
+            }
+            var subsectionTitle = subheadingMatch[1].trim();
+            var subsectionId = makeUniqueId(slugify(subsectionTitle) || "subsection");
+            currentSection.blocks.push({
+              type: "subheading",
+              title: subsectionTitle,
+              id: subsectionId,
+            });
+            continue;
+          }
+
+          var headingMatch = trimmedLine.match(/^##\s+(.+)$/);
+          if (headingMatch) {
+            flushParagraph();
+            pushSection(headingMatch[1].trim());
+            continue;
+          }
+
+          if (trimmedLine === "") {
+            flushParagraph();
+            continue;
+          }
+
+          if (!currentSection) {
+            pushSection("", "preface");
+          }
+
+          if (trimmedLine === "$$") {
+            flushParagraph();
+            var equationLines = [];
+            j += 1;
+            while (j < contentLines.length && contentLines[j].trim() !== "$$") {
+              equationLines.push(contentLines[j]);
+              j += 1;
+            }
+            currentSection.blocks.push({
+              type: "equation",
+              latex: equationLines.join("\n"),
+            });
+            continue;
+          }
+
+          var codeFenceMatch = trimmedLine.match(/^```([a-zA-Z0-9_-]+)?$/);
+          if (codeFenceMatch) {
+            flushParagraph();
+            var codeLines = [];
+            var codeLang = codeFenceMatch[1] || "";
+            j += 1;
+            while (j < contentLines.length && contentLines[j].trim() !== "```") {
+              codeLines.push(contentLines[j]);
+              j += 1;
+            }
+            currentSection.blocks.push({
+              type: "code",
+              language: codeLang,
+              code: codeLines.join("\n"),
+            });
+            continue;
+          }
+
+          var imageMatch = trimmedLine.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+          if (imageMatch) {
+            flushParagraph();
+            var caption = "";
+            if (j + 1 < contentLines.length) {
+              var nextLine = contentLines[j + 1].trim();
+              var hasItalicWrapper =
+                nextLine.length >= 2 &&
+                nextLine.charAt(0) === "*" &&
+                nextLine.charAt(nextLine.length - 1) === "*";
+              if (hasItalicWrapper) {
+                caption = nextLine.slice(1, -1).trim();
+                j += 1;
+              }
+            }
+            currentSection.blocks.push({
+              type: "image",
+              alt: imageMatch[1],
+              src: imageMatch[2],
+              caption: caption,
+            });
+            continue;
+          }
+
+          paragraphLines.push(trimmedLine);
+        }
+
+        flushParagraph();
+
+        return {
+          meta: {
+            title: frontMatter.meta.title || "Untitled",
+            authors: frontMatter.meta.authors || "",
+            affiliations: frontMatter.meta.affiliations || "",
+            date: frontMatter.meta.date || "",
+          },
+          sections: sections,
+        };
+      }
+
+      function buildHeader(content) {
+        var header = document.createElement("header");
+        header.className = "article-header";
+
+        var title = document.createElement("h1");
+        title.className = "article-title";
+        title.textContent = content.meta.title;
+        header.appendChild(title);
+
+        if (content.meta.authors) {
+          var authors = document.createElement("p");
+          authors.className = "article-authors";
+          authors.innerHTML = content.meta.authors;
+          header.appendChild(authors);
+        }
+
+        if (content.meta.affiliations) {
+          var affiliations = document.createElement("p");
+          affiliations.className = "article-affiliations";
+          affiliations.innerHTML = content.meta.affiliations;
+          header.appendChild(affiliations);
+        }
+
+        var meta = document.createElement("p");
+        meta.className = "article-meta";
+        meta.textContent = content.meta.date;
+        header.appendChild(meta);
+
+        articleRoot.appendChild(header);
+      }
+
+      function buildSection(sectionData, sectionIndex) {
+        var section = document.createElement("section");
+        section.id = sectionData.id;
+
+        var isIntroductionHeading = sectionData.title.trim().toLowerCase() === "introduction";
+        if (sectionIndex > 0 && !isIntroductionHeading) {
+          var heading = document.createElement("h2");
+          heading.textContent = sectionData.title;
+          section.appendChild(heading);
+        }
+
+        for (var j = 0; j < sectionData.blocks.length; j += 1) {
+          var block = sectionData.blocks[j];
+
+          if (block.type === "paragraph") {
+            var wrapper = document.createElement("div");
+            wrapper.className = "paragraph-with-note";
+
+            var p = document.createElement("p");
+            var paragraphFootnoteIds = [];
+            p.innerHTML = renderInline(block.text, paragraphFootnoteIds, true);
+
+            if (paragraphFootnoteIds.length > 0) {
+              var sideNote = document.createElement("aside");
+              sideNote.className = "sidenote";
+              var sideNoteChunks = [];
+              for (var k = 0; k < paragraphFootnoteIds.length; k += 1) {
+                var footnoteId = paragraphFootnoteIds[k];
+                var footnoteNumber = footnoteNumbersById[footnoteId];
+                var noteText = footnotesById[footnoteId] || "";
+                sideNoteChunks.push(
+                  '<div id="note-' + footnoteNumber + '"><span class="sidenote-index">' + footnoteNumber + "</span>" +
+                  renderInline(noteText, [], false) + "</div>"
+                );
+              }
+              sideNote.innerHTML = sideNoteChunks.join("");
+              wrapper.appendChild(p);
+              wrapper.appendChild(sideNote);
+            } else {
+              wrapper.appendChild(p);
+            }
+
+            section.appendChild(wrapper);
+          } else if (block.type === "tldr") {
+            var tldr = document.createElement("aside");
+            tldr.className = "tldr-box";
+            var tldrParagraph = document.createElement("p");
+            tldrParagraph.innerHTML = "<strong>tl;dr:</strong> " + renderInline(block.text, [], false);
+            tldr.appendChild(tldrParagraph);
+            section.appendChild(tldr);
+          } else if (block.type === "equation") {
+            var equationWrap = document.createElement("div");
+            equationWrap.className = "display-equation";
+            equationWrap.textContent = "$$" + block.latex + "$$";
+            section.appendChild(equationWrap);
+          } else if (block.type === "subheading") {
+            var heading3 = document.createElement("h3");
+            heading3.textContent = block.title;
+            heading3.id = block.id;
+            section.appendChild(heading3);
+          } else if (block.type === "code") {
+            var codeWrap = document.createElement("pre");
+            codeWrap.className = "code-block";
+            var codeEl = document.createElement("code");
+            if (block.language) {
+              codeEl.setAttribute("data-language", block.language);
+            }
+            codeEl.textContent = block.code || "";
+            codeWrap.appendChild(codeEl);
+            section.appendChild(codeWrap);
+          } else if (block.type === "image") {
+            var figure = document.createElement("figure");
+            figure.className = "text-width-image";
+
+            var image = document.createElement("img");
+            image.src = block.src;
+            image.alt = block.alt || "";
+            figure.appendChild(image);
+
+            if (block.caption) {
+              var caption = document.createElement("figcaption");
+              caption.innerHTML = renderInline(block.caption, [], false);
+              figure.appendChild(caption);
+            }
+
+            section.appendChild(figure);
+          }
+        }
+
+        articleRoot.appendChild(section);
+      }
+
+      function buildToc() {
+        for (var i = 0; i < currentContent.sections.length; i += 1) {
+          var section = currentContent.sections[i];
+          if (!section.title || section.title.trim() === "") {
+            // preface blocks can still contain subsections that should appear in the TOC
+          } else {
+            var item = document.createElement("li");
+            var link = document.createElement("a");
+            link.href = "#" + section.id;
+            link.textContent = section.title;
+            item.appendChild(link);
+            tocList.appendChild(item);
+          }
+
+          for (var j = 0; j < section.blocks.length; j += 1) {
+            var block = section.blocks[j];
+            if (block.type !== "subheading") {
+              continue;
+            }
+            var subItem = document.createElement("li");
+            var subLink = document.createElement("a");
+            subLink.className = "toc-subsection";
+            subLink.href = "#" + block.id;
+            subLink.textContent = block.title;
+            subItem.appendChild(subLink);
+            tocList.appendChild(subItem);
+          }
+        }
+      }
+
+      function buildReferences() {
+        if (citationOrder.length === 0) {
+          return;
+        }
+
+        var referencesSection = document.createElement("section");
+        referencesSection.className = "references";
+        referencesSection.id = "references";
+
+        var title = document.createElement("h3");
+        title.textContent = "References";
+        referencesSection.appendChild(title);
+
+        var list = document.createElement("ol");
+        for (var i = 0; i < citationOrder.length; i += 1) {
+          var citationId = citationOrder[i];
+          var reference = referencesById[citationId];
+          if (!reference) {
+            continue;
+          }
+          var item = document.createElement("li");
+          item.id = "ref-" + citationId;
+
+          if (reference.url) {
+            var splitMatch = reference.text.match(/^(.*?)\s+(\([^()]+\))([.,])?$/);
+            var refLink = document.createElement("a");
+            refLink.href = reference.url;
+            if (splitMatch) {
+              refLink.textContent = splitMatch[1];
+              item.appendChild(refLink);
+              item.appendChild(document.createTextNode(" " + splitMatch[2] + (splitMatch[3] || "")));
+            } else {
+              refLink.textContent = reference.text;
+              item.appendChild(refLink);
+            }
+          } else {
+            item.textContent = reference.text;
+          }
+
+          list.appendChild(item);
+        }
+
+        referencesSection.appendChild(list);
+        articleRoot.appendChild(referencesSection);
+      }
+
+      function alignTocWithFirstParagraph() {
+        var toc = document.querySelector(".toc");
+        if (!toc) {
+          return;
+        }
+
+        if (window.matchMedia("(max-width: 1220px)").matches) {
+          toc.style.marginTop = "0px";
+          return;
+        }
+
+        var firstParagraph = articleRoot.querySelector("section p");
+        if (!firstParagraph) {
+          toc.style.marginTop = "0px";
+          return;
+        }
+
+        var visualNudgePx = 4;
+        var previousPosition = toc.style.position;
+        var previousTop = toc.style.top;
+        toc.style.position = "static";
+        toc.style.top = "auto";
+
+        var tocDocumentTop = toc.getBoundingClientRect().top + window.scrollY;
+        var paragraphDocumentTop = firstParagraph.getBoundingClientRect().top + window.scrollY;
+        var offset = paragraphDocumentTop - tocDocumentTop - visualNudgePx;
+
+        toc.style.position = previousPosition;
+        toc.style.top = previousTop;
+        toc.style.marginTop = Math.max(0, Math.round(offset)) + "px";
+      }
+
+      function enableImageZoom() {
+        var figures = articleRoot.querySelectorAll(".text-width-image");
+        if (!figures || figures.length === 0) {
+          return;
+        }
+
+        function closeAllZoomed() {
+          for (var i = 0; i < figures.length; i += 1) {
+            figures[i].classList.remove("is-zoomed");
+          }
+        }
+
+        for (var i = 0; i < figures.length; i += 1) {
+          (function (figure) {
+            var image = figure.querySelector("img");
+            if (!image) {
+              return;
+            }
+            image.addEventListener("click", function (event) {
+              event.preventDefault();
+              var willOpen = !figure.classList.contains("is-zoomed");
+              closeAllZoomed();
+              if (willOpen) {
+                figure.classList.add("is-zoomed");
+              }
+            });
+          })(figures[i]);
+        }
+
+        document.addEventListener("keydown", function (event) {
+          if (event.key === "Escape") {
+            closeAllZoomed();
+          }
+        });
+      }
+
+      function waitForInitialLayout() {
+        if (!document.fonts || !document.fonts.ready) {
+          return Promise.resolve();
+        }
+        return Promise.race([
+          document.fonts.ready,
+          new Promise(function (resolve) {
+            setTimeout(resolve, 1200);
+          }),
+        ]);
+      }
+
+      var markdownResponse;
+      try {
+        markdownResponse = await fetch("content/blog.md");
+      } catch (error) {
+        articleRoot.innerHTML = "<p>Failed to load content/blog.md.</p>";
+        revealPage();
+        return;
+      }
+
+      if (!markdownResponse.ok) {
+        articleRoot.innerHTML = "<p>Failed to load content/blog.md.</p>";
+        revealPage();
+        return;
+      }
+
+      var markdown = await markdownResponse.text();
+      var currentContent = parseMarkdown(markdown);
+
+      buildHeader(currentContent);
+      buildToc();
+      for (var i = 0; i < currentContent.sections.length; i += 1) {
+        buildSection(currentContent.sections[i], i);
+      }
+      buildReferences();
+      enableImageZoom();
+      if (window.__renderBlogMath) {
+        window.__renderBlogMath();
+      }
+      await waitForInitialLayout();
+      alignTocWithFirstParagraph();
+      revealPage();
+      window.addEventListener("load", alignTocWithFirstParagraph);
+      window.addEventListener("resize", alignTocWithFirstParagraph);
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(alignTocWithFirstParagraph);
+      }
+    })();
+  </script>
+</body>
+</html>
