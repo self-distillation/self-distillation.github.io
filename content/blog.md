@@ -11,23 +11,23 @@ date: February 2026
 
 One of the most remarkable aspects of human intelligence is our ability to learn from virtually any kind of signal. We learn by watching others succeed or fail, by receiving explicit feedback from teachers, and even by reflecting on our own mistakes. Each learning experience, no matter how different in form, changes what we know and how we behave.
 
-For decades, machine learning couldn't match this flexibility. Different types of learning signals require entirely different algorithms: supervised learning for labeled data, reinforcement learning for scalar rewards, and so on. Each approach came with its own mathematical framework, training procedures, and limitations. Building AI systems that could learn flexibly, the way humans do, seemed like a distant goal.
+For decades, machine learning couldn't match this flexibility. Different types of learning signals require entirely different algorithms: supervised learning for labeled data, reinforcement learning for scalar rewards, and so on. Each approach came with its own mathematical framework, training procedures, and limitations. Building AI systems that could learn flexibly and cotinually, the way humans do, seemed like a distant goal.
 
 Then something changed. The emergence of large-scale pretraining gave rise to a surprising capability called in-context learning (ICL). Large language models, it turned out, could adapt their behavior simply by being shown examples or instructions in their input. Show a model a few examples of translating English to French, and it starts translating. Give it a new task description, and it adjusts accordingly. All of this happens at inference time, just by conditioning the model on the right context.
-The research community has extensively studied ICL and discovered just how flexible it can be. Models can digest an impressive variety of learning signals through their context window—from demonstrations [@brown2020language] to verbal feedback [@shinn2023reflexion] and self-reflection [@madaan2023self]. Recent work has even shown that with the right prompting mechanisms, ICL can be as powerful as explicit training algorithms in certain settings [@agrawal2025gepa].
+The research community has extensively studied ICL and discovered just how flexible it can be. Models can digest an impressive variety of learning signals through their context window—from demonstrations [@brown2020language] to verbal feedback [@shinn2023reflexion] and self-reflection [@madaan2023self].
 
 But ICL has a fundamental limitation: it's transient. The moment you remove the context, the learned behavior disappears. The model reverts to its base behavior, unable to retain what it just learned.
 However, context windows are inherently bounded,[^boundedcontext] and hence, long-term learning requires some form of compression.
 
-A natural form of compression is compression into model weights. A model's weights guide its behavior, encapsulate its skills, and compress its general knowledge.
+A natural form of compression is compression into model weights. 
 Most common methods for in-weight learning perform gradient descent on an external signal: either imitating demonstrations (e.g., supervised fine-tuning (SFT)) [@ouyang2022training], mimicking another model through distillation [@hinton2015distilling], or following an external reward signal (e.g., reinforcement learning with verifiable rewards (RLVR)) [@lambert2024tulu].
-These existing methods for in-weight learning exhibit a fundamentally different behavior to ICL: they are *forcing* the model to change its behavior based on an external signal, whereas ICL enables the model to decide itself how its behavior should change given its context.
+These existing methods for in-weight learning exhibit fundamentally different behavior to ICL: they *force* the model to change its behavior based on an external signal, whereas ICL enables the model to decide itself how its behavior should change given its context.
 
-For example, consider giving the model a complex math problem. After submitting its attempt you provide it with a sample solution. SFT would change the model's weights to imitate that sample solution. RLVR would check whether the attempt was correct and then reinforce or discourage the full attempt.
+For example, consider giving the model a complex math problem. After submitting its attempt, you provide it with a sample solution. SFT would change the model's weights to imitate that sample solution. RLVR would check whether the attempt was correct and then reinforce or discourage the full attempt.
 In contrast, through ICL the model can retrospectively adjust its initial attempt based on the sample solution.
-That is, the model *decides for itself* how its answer should change based on the additional context.
+That is, the model *decides for itself* how its answer should change in response to the additional context.
 
-We propose a learning paradigm that bridges this gap: **Self-Distillation**. The key insight is that we can harness the powerful generalization capabilities and flexibility of in-context learning to create permanent changes to the model's parameters.[^contextdistillation]
+We propose a learning paradigm that bridges this gap: **Self-Distillation**. The key insight is that we can harness the powerful generalization capabilities and flexibility of in-context learning to permanently change the model's parameters.[^contextdistillation]
 
 ![> Pretraining -> ICL -> self-distillation](figures/main.png)
 ***Figure 1:** Whereas the ability for in-context learning emerged from pre-training, self-distillation emerges as a consequence of in-context learning.*
