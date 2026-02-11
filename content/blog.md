@@ -20,7 +20,7 @@ But ICL has a fundamental limitation: it's transient. The moment you remove the 
 However, context windows are inherently bounded,[^boundedcontext] and hence, long-term learning requires some form of compression.
 
 A natural form of compression is compression into model weights. A model's weights guide its behavior, encapsulate its skills, and compress its general knowledge.
-Most common methods for in-weight learning perform gradient descent on an external signal: either imitating demonstrations (e.g., supervised fine-tuning (SFT)) [@ouyang2022training], mimicking another model [@hinton2015distilling], or following an external reward signal (e.g., reinforcement learning with verifiable rewards (RLVR)) [@lambert2024tulu].
+Most common methods for in-weight learning perform gradient descent on an external signal: either imitating demonstrations (e.g., supervised fine-tuning (SFT)) [@ouyang2022training], mimicking another model through distillation [@hinton2015distilling], or following an external reward signal (e.g., reinforcement learning with verifiable rewards (RLVR)) [@lambert2024tulu].
 These existing methods for in-weight learning exhibit a fundamentally different behavior to ICL: they are *forcing* the model to change its behavior based on an external signal, whereas ICL enables the model to decide itself how its behavior should change given its context.
 
 For example, consider giving the model a complex math problem. After submitting its attempt you provide it with a sample solution. SFT would change the model's weights to imitate that sample solution. RLVR would check whether the attempt was correct and then reinforce or discourage the full attempt.
@@ -51,6 +51,8 @@ $$
 $$
 <!-- Jonas: I dropped \theta from the outer expectation so that we have the simpler token-level gradient -->
 
+Jonas: use general divergence?
+
 where $\pi_\theta(\cdot|x, y_{<t})$ is the student's next-token distribution given the prompt and previous tokens, and $\pi_\theta(\cdot|x, c, y_{<t})$ is the self-teacher's distribution when additionally conditioned on the context $c$.
 
 Taking the gradient of this objective through the student (while keeping the self-teacher fixed) gives us the following update rule:
@@ -58,6 +60,8 @@ Taking the gradient of this objective through the student (while keeping the sel
 $$
 \nabla_{\!\theta}\, \mathcal{L}(\theta) = \mathbb E_{y \sim \pi_\theta(\cdot|x)} \!\left[ \sum_{t=1}^{|y|} \mathbb E_{\hat{y}_t \sim \pi_\theta(\cdot|x,y_{<t})} \!\left[ \nabla_\theta \log \pi_\theta(\hat{y}_t|x, y_{<t}) \cdot \log \frac{\pi_\theta(\hat{y}_t|x, y_{<t})}{\pi_\theta(\hat{y}_t|x, c, y_{<t})} \right] \right]
 $$
+
+TODO: describe intuition / relate to policy gradient
 
 ## Use Cases
 
