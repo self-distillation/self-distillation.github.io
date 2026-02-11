@@ -59,16 +59,6 @@ $$
 \nabla_{\!\theta}\, \mathcal{L}(\theta) = \mathbb E_{y \sim \pi_\theta(\cdot|x)} \!\left[ \sum_{t=1}^{|y|} \mathbb E_{\hat{y}_t \sim \pi_\theta(\cdot|x,y_{<t})} \!\left[ \nabla_\theta \log \pi_\theta(\hat{y}_t|x, y_{<t}) \cdot \log \frac{\pi_\theta(\hat{y}_t|x, y_{<t})}{\pi_\theta(\hat{y}_t|x, c, y_{<t})} \right] \right]
 $$
 
-### Why on-policy learning?
-
-TODO: define on-policy vs off-policy
-
-But there's a crucial design choice that makes self-distillation effective: we use \emph{on-policy distillation}. This means that instead of distilling over some fixed dataset, we generate fresh responses from the current student model at each training step and then distill the teacher's knowledge on those specific responses.
-
-Why does this matter? On-policy learning has been shown to provide several key benefits. It improves in-distribution performance by avoiding the distributional mismatch between training and inference [CITE DAGGER]. It substantially reduces catastrophic forgetting when learning new tasks, as the model continues to practice its existing capabilities [CITE RL's RAZOR]. And perhaps most surprisingly, it improves out-of-distribution generalization compared to standard supervised learning [CITE SFT MEMORIZE RL GENERALIZE]. The intuition is simple: by training on the model's own outputs, we ensure that the model learns to handle the kinds of mistakes and patterns it actually produces, rather than only learning from a static dataset that may not reflect its current behavior.
-
-often $c$ depends causally on $y$
-
 ## Use Cases
 
 TODO: overview
@@ -102,6 +92,16 @@ In practice, the recursion depth is $\mathcal{O}(\log T)$ for balanced splits, w
 ### Intuition behind positive / negative advantages
 
 ### Sparse advantages
+
+### Why on-policy learning?
+
+TODO: define on-policy vs off-policy
+
+But there's a crucial design choice that makes self-distillation effective: we use \emph{on-policy distillation}. This means that instead of distilling over some fixed dataset, we generate fresh responses from the current student model at each training step and then distill the teacher's knowledge on those specific responses.
+
+Why does this matter? On-policy learning has been shown to provide several key benefits. It improves in-distribution performance by avoiding the distributional mismatch between training and inference [CITE DAGGER]. It substantially reduces catastrophic forgetting when learning new tasks, as the model continues to practice its existing capabilities [CITE RL's RAZOR]. And perhaps most surprisingly, it improves out-of-distribution generalization compared to standard supervised learning [CITE SFT MEMORIZE RL GENERALIZE]. The intuition is simple: by training on the model's own outputs, we ensure that the model learns to handle the kinds of mistakes and patterns it actually produces, rather than only learning from a static dataset that may not reflect its current behavior.
+
+Jonas: often $c$ depends causally on $y$, in which case on-policy learning is more compute efficient. We should also mention how this improves performance over off-policy training on the self-teacher.
 
 ### Combining on-policy and off-policy learning
 
