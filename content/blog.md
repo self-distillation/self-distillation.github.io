@@ -44,18 +44,19 @@ Here's how it works in practice. Given a prompt $x$ and a context $c$ (which cou
 ![> Illustration of on-policy self-distillation](figures/main.png)
 ***Figure 2:** ...*
 
-Formally, we train the policy $\pi$ by minimizing the reverse KL divergence between the student and the teacher:
+Formally, we train the policy $\pi$ by minimizing the reverse KL divergence between the student and the self-teacher:
 
 $$
-\mathcal{L}(\theta) = \mathbb E_{y \sim \pi_\theta(\cdot|x)} \left[ \sum_{t=1}^{|y|} D_{\text{KL}}\left(\pi_\theta(\cdot|x, y_{<t}) \,\|\, \pi_\theta(\cdot|x, c, y_{<t})\right) \right]
+\mathcal{L}(\theta) = \mathbb E_{y \sim \pi(\cdot|x)} \left[ \sum_{t=1}^{|y|} D_{\text{KL}}\large(\underbrace{\pi_\theta(\cdot|x, y_{<t})}_{\text{student}} \,\|\, \underbrace{\pi_\theta(\cdot|x, c, y_{<t})}_{\text{self-teacher}}\large) \right]
 $$
+<!-- Jonas: I dropped \theta from the outer expectation so that we have the simpler token-level gradient -->
 
-where $\pi_\theta(\cdot|x, y_{<t})$ is the student's next-token distribution given the prompt and previous tokens, and $\pi_\theta(\cdot|x, c, y_{<t})$ is the teacher's distribution when additionally conditioned on the context $c$.
+where $\pi_\theta(\cdot|x, y_{<t})$ is the student's next-token distribution given the prompt and previous tokens, and $\pi_\theta(\cdot|x, c, y_{<t})$ is the self-teacher's distribution when additionally conditioned on the context $c$.
 
-Taking the gradient of this objective through the student (while keeping the teacher fixed) gives us the following update rule:
+Taking the gradient of this objective through the student (while keeping the self-teacher fixed) gives us the following update rule:
 
 $$
-\nabla_\theta \mathcal{L}(\theta) = \mathbb E_{y \sim \pi_\theta(\cdot|x)} \left[ \sum_{t=1}^{|y|} \sum_{v \in \mathcal{V}} \nabla_\theta \log \pi_\theta(v|x, y_{<t}) \cdot \log \frac{\pi_\theta(v|x, y_{<t})}{\pi_\theta(v|x, c, y_{<t})} \right]
+\nabla_{\!\theta}\, \mathcal{L}(\theta) = \mathbb E_{y \sim \pi_\theta(\cdot|x)} \!\left[ \sum_{t=1}^{|y|} \mathbb E_{\hat{y}_t \sim \pi_\theta(\cdot|x,y_{<t})} \!\left[ \nabla_\theta \log \pi_\theta(\hat{y}_t|x, y_{<t}) \cdot \log \frac{\pi_\theta(\hat{y}_t|x, y_{<t})}{\pi_\theta(\hat{y}_t|x, c, y_{<t})} \right] \right]
 $$
 
 ### Why on-policy learning?
@@ -74,9 +75,9 @@ TODO: overview
 
 ### 1) Learning from demonstrations
 
-### 2) Learning from successful attempts
+### 2) Learning from scalar rewards
 
-### 3) Learning from textual feedback
+### 3) Learning from environment feedback
 
 ### 4) Learning from raw user interactions
 
