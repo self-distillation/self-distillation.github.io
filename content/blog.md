@@ -162,7 +162,7 @@ Or use the BibTeX citations:
 ```
 
 [^boundedcontext]: Attending to all tokens in-context requires linearly growing memory, preventing learning from long streams of experience.
-[^contextdistillation]: Self-distillation is a natural descendant of "context distillation", where a fixed context (e.g., a system prompt or long document) is compressed into model weights [@bai2022constitutional] [@eyuboglu2025cartridges].
+[^contextdistillation]: Self-distillation is a natural descendant of "context distillation", where a fixed context (e.g., a system prompt or long document) is compressed into model weights [@bai2022constitutional] [@snell2022learning].
 
 [@brown2020language]: Language Models are Few-Shot Learners (Brown et al, 2020) || https://arxiv.org/abs/2005.14165
 [@shinn2023reflexion]: Reflexion: Language Agents with Verbal Reinforcement Learning (Shinn et al, 2023) || https://arxiv.org/abs/2303.11366
@@ -173,3 +173,4 @@ Or use the BibTeX citations:
 [@lambert2024tulu]: Tulu 3: Pushing Frontiers in Open Language Model Post-Training (Lambert et al, 2024) || https://arxiv.org/abs/2411.15124
 [@bai2022constitutional]: Constitutional AI: Harmlessness from AI Feedback (Bai et al, 2022) || https://arxiv.org/abs/2212.08073
 [@eyuboglu2025cartridges]: Cartridges: Lightweight and General-Purpose Long Context Representations via Self-Study (Eyuboglu et al, 2025) || https://arxiv.org/abs/2506.06266
+[@snell2022learning]: Learning by Distilling Context (Snell et al, 2022) || https://arxiv.org/abs/2209.15189
