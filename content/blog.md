@@ -5,7 +5,7 @@ affiliations: <sup>1</sup>MIT <sup>2</sup>ETH Zurich
 date: February 2026
 ---
 
-**tl;dr:** Self-distillation is a new learning paradigm enabling continual in-weight learning from arbitrary data. We show how it can be used to learn from expert demonstrations, from scalar rewards, and from arbitrary other feedback such as runtime errors or raw user conversations.
+**tl;dr:** Self-distillation is a new learning paradigm enabling continual in-weight learning from arbitrary data. We show how it can be used to learn from [expert demonstrations](#1-learning-from-demonstrations), from [scalar rewards](#2-learning-from-scalar-rewards), and from arbitrary textual environment feedback such as [errors in a code environment](#3-learning-from-environment-feedback) or [raw user conversations](#4-learning-from-raw-user-interactions).
 
 ## Introduction
 
