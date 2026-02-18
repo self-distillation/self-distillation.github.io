@@ -16,12 +16,7 @@ For decades, machine learning couldn't match this flexibility. Different types o
 This is not the case anymore. The emergence of large-scale pretraining gave rise to a surprising capability called in-context learning (ICL). Large language models, it turned out, could adapt their behavior simply by being shown examples or instructions in their input. Show a model a few examples of translating English to French, and it starts translating. Give it a new task description, and it adjusts accordingly. All of this happens at inference time, just by conditioning the model on the right context.
 The research community has extensively studied ICL and discovered just how flexible it can be. Models can digest an impressive variety of learning signals through their context window—from demonstrations [@brown2020language] to verbal feedback [@shinn2023reflexion] and self-reflection [@madaan2023self].
 
-But ICL has a fundamental limitation: it's transient. The moment you remove the context, the learned behavior disappears. The model reverts to its base behavior, unable to retain what it just learned.
-However, context windows are inherently bounded,[^boundedcontext] and hence, long-term learning requires some form of compression.
-
 But ICL has a fundamental limitation: it’s transient. The moment you remove the context, the learned behavior disappears. The model reverts to its base behavior, unable to retain what it just learned. Context windows are inherently bounded,[^boundedcontext] and long-term learning therefore requires compression of the behavior the context created into the model’s weights.
-
-We propose a learning paradigm that bridges this gap: **Self-Distillation**. The key insight is that we can harness the powerful generalization capabilities and flexibility of in-context learning to permanently change the model's parameters.[^contextdistillation]
 
 We propose a learning paradigm that bridges this gap: **Self-Distillation**. The key insight is that if a model can temporarily improve its behavior through context, we can treat that improved behavior as supervision and distill it back into the model itself. In this way, the flexibility of in-context learning becomes a mechanism for permanently changing the model’s parameters.
 
