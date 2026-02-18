@@ -18,6 +18,14 @@ The research community has extensively studied ICL and discovered just how flexi
 
 But ICL has a fundamental limitation: it’s transient. The moment you remove the context, the learned behavior disappears. The model reverts to its base behavior, unable to retain what it just learned. Context windows are inherently bounded,[^boundedcontext] and long-term learning therefore requires compression of the behavior the context created into the model’s weights.
 
+<!-- A natural form of compression is compression into model weights.
+Most common methods for in-weight learning perform gradient descent on an external signal: either imitating demonstrations (e.g., supervised fine-tuning (SFT)) [@ouyang2022training], mimicking another model through distillation [@hinton2015distilling], or following an external reward signal (e.g., reinforcement learning with verifiable rewards (RLVR)) [@lambert2024tulu].
+These existing methods for in-weight learning exhibit fundamentally different behavior to ICL: they *force* the model to change its behavior based on an external signal, whereas ICL enables the model to decide itself how its behavior should change given its context.
+
+For example, consider giving the model a complex math problem. After submitting its attempt, you provide it with a sample solution. SFT would change the model's weights to imitate that sample solution. RLVR would check whether the attempt was correct and then reinforce or discourage the full attempt.
+In contrast, through ICL the model can retrospectively adjust its initial attempt based on the sample solution.
+That is, the model *decides for itself* how its answer should change in response to the additional context. -->
+
 We propose a learning paradigm that bridges this gap: **Self-Distillation**. The key insight is that if a model can temporarily improve its behavior through context, we can treat that improved behavior as supervision and distill it back into the model itself. In this way, the flexibility of in-context learning becomes a mechanism for permanently changing the model’s parameters.
 
 ![> Pretraining -> ICL -> self-distillation](figures/main.png)
@@ -45,7 +53,7 @@ where $\pi_\theta(\cdot|x, y_{<t})$ is the student's next-token distribution giv
 Taking the gradient of this objective through the student (while keeping the self-teacher fixed) gives us the following update rule:
 
 $$
-\nabla_{\!\theta}\, \mathcal{L}(\theta) = \mathbb E_{y \sim \pi_\theta(\cdot|x)} \!\left[ \sum_{t=1}^{|y|} \mathbb E_{\hat{y}_t \sim \pi_\theta(\cdot|x,y_{<t})} \!\left[ \nabla_\theta \log \pi_\theta(\hat{y}_t|x, y_{<t}) \cdot \log \frac{\pi_\theta(\hat{y}_t|x, y_{<t})}{\pi_\theta(\hat{y}_t|x, c, y_{<t})} \right] \right]
+\nabla_{\!\theta}\, \mathcal{L}(\theta) = \mathbb E_{y \sim \pi_\theta(\cdot|x)} \!\left[ \sum_{t=1}^{|y|} \mathbb E_{{y}_t \sim \pi_\theta(\cdot|x,y_{<t})} \!\left[ \nabla_\theta \log \pi_\theta({y}_t|x, y_{<t}) \cdot \log \frac{\pi_\theta({y}_t|x, y_{<t})}{\pi_\theta({y}_t|x, c, y_{<t})} \right] \right]
 $$
 
 TODO: describe intuition / relate to policy gradient
@@ -62,27 +70,13 @@ TODO: overview
 
 ### 4) Learning from raw user interactions
 
-<!-- ## Does RL scale?
-
-Over the past few years, we have seen several objective families scale smoothly with data and compute. Reinforcement learning also scales, but some formulations scale less gracefully than others [@silver2016go] [@schulman2017ppo].[^scale]
-
-A common issue is temporal credit assignment. In tabular notation, we still optimize quantities like $Q^\pi(s,a)$ and $V^\pi(s)$, but learning can become unstable when trajectories are long and noisy.
-
-## Divide and conquer updates
-
-One practical strategy is to decompose a long return into shorter chunks, then recursively combine local value estimates. Intuitively, this replaces one fragile $T$-step update with a tree of simpler updates [@bertsekas1995dp].[^dp]
-
-$$
-\hat{G}_{1:T} = \hat{G}_{1:T/2} + \gamma^{T/2}\hat{G}_{T/2+1:T}
-$$
-
-In practice, the recursion depth is $\mathcal{O}(\log T)$ for balanced splits, which can substantially reduce optimization pressure compared to naively chaining $T$ terms. -->
-
 ## Understanding / Interpretation
 
 ### Intuition behind positive / negative advantages
 
 ### Sparse advantages
+
+### Scaling model size
 
 ### Why on-policy learning?
 
@@ -101,6 +95,12 @@ Jonas: often $c$ depends causally on $y$, in which case on-policy learning is mo
 ## Conclusion
 
 ...
+
+### Concurrent work on self-distillation
+
+Discuss off-policy papers
+
+Discuss other two on-policy papers
 
 ## Citation
 
