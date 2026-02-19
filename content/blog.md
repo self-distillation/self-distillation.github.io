@@ -1,11 +1,11 @@
 ---
-title: Self-Distillation
+title: On-Policy Self-Distillation
 authors: <a href="https://idanshen.github.io/">Idan Shenfeld</a><sup>1</sup>, <a href="https://jonhue.github.io/">Jonas Hübotter</a><sup>2</sup>, <a href="https://thomasklbg.github.io/">Thomas Kleine Buening</a><sup>2</sup> and others
 affiliations: <sup>1</sup>MIT <sup>2</sup>ETH Zurich
 date: February 2026
 ---
 
-**tl;dr:** Self-distillation is a new learning paradigm enabling continual in-weight learning from arbitrary data. We show how it can be used to learn from [expert demonstrations](#1-learning-from-demonstrations), from [scalar rewards](#2-learning-from-scalar-rewards), and from arbitrary textual environment feedback such as [errors in a code environment](#3-learning-from-environment-feedback) or [raw user conversations](#4-learning-from-raw-user-interactions).
+**tl;dr:** On-policy self-distillation is a new learning paradigm enabling continual in-weight learning from arbitrary data. We show how it can be used to learn from [expert demonstrations](#1-learning-from-demonstrations), from [scalar rewards](#2-learning-from-scalar-rewards), and from arbitrary textual environment feedback such as [errors in a code environment](#3-learning-from-environment-feedback) or [real-world user conversations](#4-learning-from-raw-user-interactions).
 
 ## Introduction
 
@@ -42,7 +42,7 @@ What makes self-distillation particularly significant is a subtle but profound s
 Here's how it works in practice. Given a prompt $x$ and a context $c$ (which could be demonstrations, feedback, or any other learning signal), the student generates a response $y \sim \pi(\cdot|x)$ without access to $c$. Then, for this same response $y$, we evaluate what the teacher---the model \emph{with} the context---would have predicted at each token position. We train the policy $\pi$ by minimizing the reverse KL divergence between the student and the self-teacher:
 
 $$
-\mathcal{L}(\theta) = \mathbb E_{y \sim \pi(\cdot|x)} \left[ \sum_{t=1}^{|y|} D_{\text{KL}}\large(\underbrace{\pi_\theta(\cdot|x, y_{<t})}_{\text{student}} \,\|\, \underbrace{\pi_\theta(\cdot|x, c, y_{<t})}_{\text{self-teacher}}\large) \right]
+\mathcal{L}(\theta) = \mathbb E_{y \sim \pi(\cdot|x)} \left[ \sum_{t=1}^{|y|} D_{\text{KL}}\large(\underbrace{\pi_\theta(\cdot|x, y_{<t})}_{\text{student}} \,\|\, \underbrace{\pi_\theta(\cdot|x, {\color{#2ca02c}c}, y_{<t})}_{\text{\color{#2ca02c}self-teacher}}\large) \right]
 $$
 <!-- Jonas: I dropped \theta from the outer expectation so that we have the simpler token-level gradient -->
 
@@ -56,7 +56,7 @@ $$
 \nabla_{\!\theta}\, \mathcal{L}(\theta) = \mathbb E_{y \sim \pi_\theta(\cdot|x)} \!\left[ \sum_{t=1}^{|y|} \mathbb E_{{y}_t \sim \pi_\theta(\cdot|x,y_{<t})} \!\left[ \nabla_\theta \log \pi_\theta({y}_t|x, y_{<t}) \cdot \log \frac{\pi_\theta({y}_t|x, y_{<t})}{\pi_\theta({y}_t|x, c, y_{<t})} \right] \right]
 $$
 
-TODO: describe intuition / relate to policy gradient
+TODO: describe intuition / relate to policy gradient; single-sample approximation
 
 ## Use Cases
 
@@ -96,11 +96,19 @@ Jonas: often $c$ depends causally on $y$, in which case on-policy learning is mo
 
 ...
 
-### Concurrent work on self-distillation
+## A. Taxonomy of Concurrent Work on Self-Distillation
 
-Discuss off-policy papers
+Discuss off-policy papers (categorize them: SFT / DPO / GRPO)
 
-Discuss other two on-policy papers
+Discuss other on-policy papers (incl. pi-distill which generates from teacher)
+
+Todo: cite inheritance from off-policy distillation & on-policy distillation
+
+## B. Implementation Details
+
+teacher regularization
+
+other divergences
 
 ## Citation
 
