@@ -4780,6 +4780,42 @@
       box-sizing: border-box;
     }
 
+    .article-navigation {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 3rem;
+      font-family: Inter, sans-serif;
+      font-size: 1.05rem;
+    }
+
+    .article-navigation a {
+      padding: 1rem 1.2rem;
+      border: 1px solid transparent;
+      border-radius: 12px;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .article-navigation .next-article {
+      border-color: #e5e7eb;
+      background: #f9fafb;
+    }
+
+    .article-navigation a:hover,
+    .article-navigation a:focus-visible {
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+
+    .article-navigation .next-article:hover,
+    .article-navigation .next-article:focus-visible {
+      border-color: #cbd5f5;
+      background: #ffffff;
+    }
+
     .visually-hidden {
       position: absolute !important;
       width: 1px !important;
@@ -5871,6 +5907,7 @@ in Self-Distillation." arXiv preprint arXiv:2609.21561, September 2026.</code></
 </div>
 </details>
 </section>
+<nav class="article-navigation" aria-label="More self-distillation articles"><a href="index.html">Self-Distillation</a><a class="next-article" href="SDFT.html">Self-Distillation Enables Continual Learning (SDFT) <span aria-hidden="true">→</span></a></nav>
 </article>
   </main>
 
